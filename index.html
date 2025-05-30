@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+        }
+        
+        .calculator-container {
+            width: 320px;
+            background-color: #f0f0f0;
+            border-radius: 8px;
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        .title-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background-color: #f0f0f0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .title-left {
+            display: flex;
+            align-items: center;
+        }
+        
+        .title-left img {
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+        }
+        
+        .title-text {
+            font-size: 12px;
+            color: #333;
+        }
+        
+        .window-controls {
+            display: flex;
+        }
+        
+        .window-button {
+            width: 16px;
+            height: 16px;
+            margin-left: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            color: #555;
+            cursor: pointer;
+        }
+        
+        .menu-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background-color: #f9f9f9;
+        }
+        
+        .menu-left {
+            display: flex;
+            align-items: center;
+        }
+        
+        .hamburger-menu {
+            margin-right: 12px;
+            cursor: pointer;
+        }
+        
+        .calculator-type {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .history-button {
+            cursor: pointer;
+        }
+        
+        .display {
+            height: 80px;
+            padding: 20px;
+            text-align: right;
+            font-size: 40px;
+            font-weight: 500;
+            background-color: #f9f9f9;
+            border-bottom: 1px solid #e0e0e0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .memory-row {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            background-color: #f5f5f5;
+        }
+        
+        .button {
+            border: none;
+            outline: none;
+            padding: 15px 0;
+            font-size: 14px;
+            text-align: center;
+            cursor: pointer;
+            background-color: #f5f5f5;
+            transition: background-color 0.2s;
+        }
+        
+        .button:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .button:active {
+            background-color: #d0d0d0;
+        }
+        
+        .memory-button {
+            color: #333;
+            font-weight: 400;
+            font-size: 12px;
+        }
+        
+        .function-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+        }
+        
+        .function-button {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        
+        .number-button {
+            background-color: #ffffff;
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .operation-button {
+            background-color: #f0f0f0;
+            font-size: 18px;
+        }
+        
+        .equals-button {
+            background-color: #0067c0;
+            color: white;
+        }
+        
+        .equals-button:hover {
+            background-color: #005ba7;
+        }
+        
+        .equals-button:active {
+            background-color: #004e92;
+        }
+        
+        .history {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 100%;
+            background-color: white;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+            transform: translateX(100%);
+            transition: transform 0.3s;
+            z-index: 10;
+        }
+        
+        .history.active {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container">
+        <div class="title-bar">
+            <div class="title-left">
+                <div class="title-icon">📊</div>
+                <div class="title-text">Calculator</div>
+            </div>
+            <div class="window-controls">
+                <div class="window-button">−</div>
+                <div class="window-button">□</div>
+                <div class="window-button">×</div>
+            </div>
+        </div>
+        
+        <div class="menu-bar">
+            <div class="menu-left">
+                <div class="hamburger-menu">☰</div>
+                <div class="calculator-type">Standard</div>
+            </div>
+            <div class="history-button">🕒</div>
+        </div>
+        
+        <div class="display" id="display">0</div>
+        
+        <div class="memory-row">
+            <button class="button memory-button" id="mc">MC</button>
+            <button class="button memory-button" id="mr">MR</button>
+            <button class="button memory-button" id="m-plus">M+</button>
+            <button class="button memory-button" id="m-minus">M−</button>
+            <button class="button memory-button" id="ms">MS</button>
+            <button class="button memory-button" id="m-dropdown">M▾</button>
+        </div>
+        
+        <div class="function-row">
+            <button class="button function-button" id="percent">%</button>
+            <button class="button function-button" id="ce">CE</button>
+            <button class="button function-button" id="c">C</button>
+            <button class="button function-button" id="backspace">⌫</button>
+        </div>
+        
+        <div class="function-row">
+            <button class="button function-button" id="reciprocal">¹/ₓ</button>
+            <button class="button function-button" id="square">x²</button>
+            <button class="button function-button" id="sqrt">√x</button>
+            <button class="button operation-button" id="divide">÷</button>
+        </div>
+        
+        <div class="function-row">
+            <button class="button number-button" id="seven">7</button>
+            <button class="button number-button" id="eight">8</button>
+            <button class="button number-button" id="nine">9</button>
+            <button class="button operation-button" id="multiply">×</button>
+        </div>
+        
+        <div class="function-row">
+            <button class="button number-button" id="four">4</button>
+            <button class="button number-button" id="five">5</button>
+            <button class="button number-button" id="six">6</button>
+            <button class="button operation-button" id="subtract">−</button>
+        </div>
+        
+        <div class="function-row">
+            <button class="button number-button" id="one">1</button>
+            <button class="button number-button" id="two">2</button>
+            <button class="button number-button" id="three">3</button>
+            <button class="button operation-button" id="add">+</button>
+        </div>
+        
+        <div class="function-row">
+            <button class="button function-button" id="negate">+/−</button>
+            <button class="button number-button" id="zero">0</button>
+            <button class="button number-button" id="decimal">.</button>
+            <button class="button equals-button" id="equals">=</button>
+        </div>
+    </div>
+    
+    <script>
+        // Calculator state
+        let displayValue = '0';
+        let firstOperand = null;
+        let waitingForSecondOperand = false;
+        let operator = null;
+        let memory = 0;
+        let lastResult = null;
+        
+        // DOM elements
+        const display = document.getElementById('display');
+        
+        // Helper functions
+        function updateDisplay() {
+            display.textContent = displayValue;
+        }
+        
+        function inputDigit(digit) {
+            if (waitingForSecondOperand) {
+                displayValue = digit;
+                waitingForSecondOperand = false;
+            } else {
+                displayValue = displayValue === '0' ? digit : displayValue + digit;
+            }
+            updateDisplay();
+        }
+        
+        function inputDecimal() {
+            if (waitingForSecondOperand) {
+                displayValue = '0.';
+                waitingForSecondOperand = false;
+                updateDisplay();
+                return;
+            }
+            
+            if (!displayValue.includes('.')) {
+                displayValue += '.';
+                updateDisplay();
+            }
+        }
+        
+        function clearDisplay() {
+            displayValue = '0';
+            updateDisplay();
+        }
+        
+        function clearAll() {
+            displayValue = '0';
+            firstOperand = null;
+            waitingForSecondOperand = false;
+            operator = null;
+            updateDisplay();
+        }
+        
+        function handleOperator(nextOperator) {
+            const inputValue = parseFloat(displayValue);
+            
+            if (firstOperand === null) {
+                firstOperand = inputValue;
+            } else if (operator) {
+                const result = performCalculation();
+                displayValue = String(result);
+                firstOperand = result;
+            }
+            
+            waitingForSecondOperand = true;
+            operator = nextOperator;
+            updateDisplay();
+        }
+        
+        function performCalculation() {
+            const inputValue = parseFloat(displayValue);
+            
+            if (operator === '+') {
+                return firstOperand + inputValue;
+            } else if (operator === '-') {
+                return firstOperand - inputValue;
+            } else if (operator === '*') {
+                return firstOperand * inputValue;
+            } else if (operator === '/') {
+                if (inputValue === 0) {
+                    alert("Cannot divide by zero");
+                    clearAll();
+                    return 0;
+                }
+                return firstOperand / inputValue;
+            }
+            
+            return inputValue;
+        }
+        
+        function handleEquals() {
+            if (!firstOperand) {
+                return;
+            }
+            
+            const inputValue = parseFloat(displayValue);
+            const result = performCalculation();
+            
+            displayValue = String(result);
+            lastResult = result;
+            firstOperand = null;
+            waitingForSecondOperand = false;
+            operator = null;
+            updateDisplay();
+        }
+        
+        function handleBackspace() {
+            if (displayValue.length === 1 || (displayValue.length === 2 && displayValue.startsWith('-'))) {
+                displayValue = '0';
+            } else {
+                displayValue = displayValue.slice(0, -1);
+            }
+            updateDisplay();
+        }
+        
+        function handleNegate() {
+            const value = parseFloat(displayValue);
+            displayValue = String(-value);
+            updateDisplay();
+        }
+        
+        function handlePercent() {
+            const value = parseFloat(displayValue);
+            
+            if (firstOperand && operator) {
+                // If in the middle of an operation, calculate percentage of first operand
+                displayValue = String(firstOperand * (value / 100));
+            } else {
+                // Otherwise, just convert to percentage
+                displayValue = String(value / 100);
+            }
+            
+            updateDisplay();
+        }
+        
+        function handleReciprocal() {
+            const value = parseFloat(displayValue);
+            
+            if (value === 0) {
+                alert("Cannot divide by zero");
+                return;
+            }
+            
+            displayValue = String(1 / value);
+            updateDisplay();
+        }
+        
+        function handleSquare() {
+            const value = parseFloat(displayValue);
+            displayValue = String(value * value);
+            updateDisplay();
+        }
+        
+        function handleSquareRoot() {
+            const value = parseFloat(displayValue);
+            
+            if (value < 0) {
+                alert("Cannot calculate square root of a negative number");
+                return;
+            }
+            
+            displayValue = String(Math.sqrt(value));
+            updateDisplay();
+        }
+        
+        // Memory functions
+        function memoryClear() {
+            memory = 0;
+        }
+        
+        function memoryRecall() {
+            displayValue = String(memory);
+            updateDisplay();
+        }
+        
+        function memoryAdd() {
+            memory += parseFloat(displayValue);
+        }
+        
+        function memorySubtract() {
+            memory -= parseFloat(displayValue);
+        }
+        
+        function memoryStore() {
+            memory = parseFloat(displayValue);
+        }
+        
+        // Event listeners for number buttons
+        document.getElementById('zero').addEventListener('click', () => inputDigit('0'));
+        document.getElementById('one').addEventListener('click', () => inputDigit('1'));
+        document.getElementById('two').addEventListener('click', () => inputDigit('2'));
+        document.getElementById('three').addEventListener('click', () => inputDigit('3'));
+        document.getElementById('four').addEventListener('click', () => inputDigit('4'));
+        document.getElementById('five').addEventListener('click', () => inputDigit('5'));
+        document.getElementById('six').addEventListener('click', () => inputDigit('6'));
+        document.getElementById('seven').addEventListener('click', () => inputDigit('7'));
+        document.getElementById('eight').addEventListener('click', () => inputDigit('8'));
+        document.getElementById('nine').addEventListener('click', () => inputDigit('9'));
+        
+        // Event listeners for operation buttons
+        document.getElementById('add').addEventListener('click', () => handleOperator('+'));
+        document.getElementById('subtract').addEventListener('click', () => handleOperator('-'));
+        document.getElementById('multiply').addEventListener('click', () => handleOperator('*'));
+        document.getElementById('divide').addEventListener('click', () => handleOperator('/'));
+        document.getElementById('equals').addEventListener('click', handleEquals);
+        
+        // Event listeners for function buttons
+        document.getElementById('decimal').addEventListener('click', inputDecimal);
+        document.getElementById('c').addEventListener('click', clearAll);
+        document.getElementById('ce').addEventListener('click', clearDisplay);
+        document.getElementById('backspace').addEventListener('click', handleBackspace);
+        document.getElementById('negate').addEventListener('click', handleNegate);
+        document.getElementById('percent').addEventListener('click', handlePercent);
+        document.getElementById('reciprocal').addEventListener('click', handleReciprocal);
+        document.getElementById('square').addEventListener('click', handleSquare);
+        document.getElementById('sqrt').addEventListener('click', handleSquareRoot);
+        
+        // Event listeners for memory buttons
+        document.getElementById('mc').addEventListener('click', memoryClear);
+        document.getElementById('mr').addEventListener('click', memoryRecall);
+        document.getElementById('m-plus').addEventListener('click', memoryAdd);
+        document.getElementById('m-minus').addEventListener('click', memorySubtract);
+        document.getElementById('ms').addEventListener('click', memoryStore);
+        
+        // Keyboard support
+        document.addEventListener('keydown', (event) => {
+            const key = event.key;
+            
+            if (/[0-9]/.test(key)) {
+                event.preventDefault();
+                inputDigit(key);
+            } else if (key === '.') {
+                event.preventDefault();
+                inputDecimal();
+            } else if (key === '+') {
+                event.preventDefault();
+                handleOperator('+');
+            } else if (key === '-') {
+                event.preventDefault();
+                handleOperator('-');
+            } else if (key === '*') {
+                event.preventDefault();
+                handleOperator('*');
+            } else if (key === '/') {
+                event.preventDefault();
+                handleOperator('/');
+            } else if (key === 'Enter' || key === '=') {
+                event.preventDefault();
+                handleEquals();
+            } else if (key === 'Backspace') {
+                event.preventDefault();
+                handleBackspace();
+            } else if (key === 'Escape') {
+                event.preventDefault();
+                clearAll();
+            } else if (key === '%') {
+                event.preventDefault();
+                handlePercent();
+            }
+        });
+        
+        // Initialize display
+        updateDisplay();
+    </script>
+</body>
+</html>
